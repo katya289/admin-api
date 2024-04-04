@@ -12,7 +12,7 @@ router.post('/podcasts/upload', verifyToken, podcastController.uploadPodcast);
 
 
 
-
+router.get('/users/get', verifyToken, userController.getAuthorizedUser);
 router.get('/podcasts/get', verifyToken, podcastController.getPodcasts);
 
 module.exports = router;

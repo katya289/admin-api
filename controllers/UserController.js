@@ -6,20 +6,15 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage }).single('avatar'); 
 exports.registerUser = async (req, res) => {
     try {
-        // Обрабатываем загрузку файла аватара
+        
         upload(req, res, async (err) => {
             if (err) {
                 return res.status(400).json({ error: 'Error uploading avatar' });
             }
 
-           
             const { name, email, password } = req.body;
-
-           
             const avatar = req.file.originalname;
             console.log(avatar)
-
-    
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
                 return res.status(400).json({ error: 'User with this email already exists' });
@@ -67,6 +62,20 @@ exports.loginUser = async (req, res) => {
     }
 }
 
+exports.getAuthorizedUser = async(req, res) => {
+    try {
+        if(!req.user)
+        {
+            return res.status(401).json({ error: 'User not found' });
 
+        }
+        return res.status(200).send({message: 'Successfully fetched authorized user info', user: req.user})
+    }
+    catch(error)
+    {
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+    
+}
 
 
