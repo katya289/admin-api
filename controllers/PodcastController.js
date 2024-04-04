@@ -7,7 +7,7 @@ const User = require('../models/User');
 const Podcast = require('../models/Podcast');
 
 
-const multer = require('multer'); 
+const multer = require('multer');
 const s3 = new AWS.S3({
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_ACCESS_KEY
@@ -19,19 +19,19 @@ const upload = multer({ dest: 'uploads/' });
 exports.uploadPodcast = async (req, res) => {
     try {
 
-        upload.single('file')(req, res, async function(err) {
+        upload.single('file')(req, res, async function (err) {
             if (err) {
                 console.error('Error uploading file:', err);
                 return res.status(400).json({ error: 'Error uploading file' });
             }
 
             const { name, description, format, category } = req.body;
-            const userId = req.user.id; 
-            const file = req.file; 
+            const userId = req.user.id;
+            const file = req.file;
             const params = {
                 Bucket: 'aws-bucket.test',
-                Key: file.originalname, 
-                Body: fs.createReadStream(file.path), 
+                Key: file.originalname,
+                Body: fs.createReadStream(file.path),
                 StorageClass: 'STANDARD'
             };
             const s3UploadResponse = await s3.upload(params).promise();
@@ -49,3 +49,16 @@ exports.uploadPodcast = async (req, res) => {
     }
 }
 
+exports.getPodcasts = async (req, res) => {
+    try {
+        // const podcast = req.body;
+        const userId = req.user.id;
+        const podcast = await Podcast.findAll({ where: { userId: userId } });
+        return res.status(200).json({ message: 'Success', podcast });
+    }
+
+    catch (error) {
+        console.error('Error getting podcast:', error);
+        return res.status(400).json({ error: 'Error getting podcast' });
+    }
+}
