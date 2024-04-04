@@ -1,20 +1,35 @@
-
-var jwt = require('jsonwebtoken')
+const multer = require("multer");
+var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
-
-
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage: storage }).single('avatar'); 
 exports.registerUser = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ error: 'User with this email already exists' });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await User.create({ name, email, password: hashedPassword });
-        res.status(201).json({ message: 'User registered successfully', user: newUser });
+        // Обрабатываем загрузку файла аватара
+        upload(req, res, async (err) => {
+            if (err) {
+                return res.status(400).json({ error: 'Error uploading avatar' });
+            }
+
+           
+            const { name, email, password } = req.body;
+
+           
+            const avatar = req.file.originalname;
+            console.log(avatar)
+
+    
+            const existingUser = await User.findOne({ where: { email } });
+            if (existingUser) {
+                return res.status(400).json({ error: 'User with this email already exists' });
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = await User.create({ name, email, password: hashedPassword, avatar });
+            res.status(201).json({ message: 'User registered successfully', user: newUser });
+        });
     } catch (error) {
+        
         console.error('Error registering user:', error);
         res.status(500).json({ error: 'Internal server error' });
     }

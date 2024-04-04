@@ -25,7 +25,10 @@ const User = sequelize.define('User', {
     },
     updatedAt: {
         type: DataTypes.DATE
-    }
+    },
+    avatar: {
+        type: DataTypes.STRING 
+    },
     
 },
 {
