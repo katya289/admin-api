@@ -7,13 +7,12 @@ const User = require('../models/User');
 const Podcast = require('../models/Podcast');
 const multer = require('multer');
 
-let s3; // Определение переменной s3 здесь
-const upload = multer({dest: 'uploads/'});
+let s3;
+const upload = multer({ dest: 'uploads/' });
 
-// Функция uploadPodcast
 exports.uploadPodcast = async (req, res) => {
     try {
-        upload.single('file')(req, res, async function(err) {
+        upload.single('file')(req, res, async function (err) {
             if (err) {
                 console.error('Error uploading file:', err);
                 return res.status(400).json({ error: 'Error uploading file' });
@@ -42,20 +41,17 @@ exports.uploadPodcast = async (req, res) => {
     }
 };
 
-// Получение сетевого времени и установка AWS SDK
-ntpClient.getNetworkTime("pool.ntp.org", 123, function(err, date) {
+ntpClient.getNetworkTime("pool.ntp.org", 123, function (err, date) {
     if (err) {
         console.log(err)
     } else {
         console.log('System time synchronized:', date);
 
-        const awsTime = new Date(date); // Время вашего сервера
-        const awsOffset = awsTime.getTimezoneOffset() * 60 * 1000; // Получение смещения времени вашего сервера
-        const correctedTime = new Date(awsTime.getTime() - awsOffset); // Корректировка времени вашего сервера
+        const awsTime = new Date(date);
+        const awsOffset = awsTime.getTimezoneOffset() * 60 * 1000;
+        const correctedTime = new Date(awsTime.getTime() - awsOffset);
 
         console.log('Corrected time:', correctedTime);
-
-        // Настройка AWS SDK с корректированным временем
         AWS.config.update({ correctClockSkew: true, systemClockOffset: awsOffset });
 
         s3 = new AWS.S3({
@@ -70,7 +66,7 @@ ntpClient.getNetworkTime("pool.ntp.org", 123, function(err, date) {
 
 exports.getPodcasts = async (req, res) => {
     try {
-        // const podcast = req.body;
+
         const userId = req.user.id;
         const podcast = await Podcast.findAll({ where: { userId: userId } });
         return res.status(200).json({ message: 'Success', podcast });
