@@ -101,3 +101,12 @@ exports.deleteUserAccount = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+
+
+// exports.userLogout = async (req, res) => {
+//     delete req.headers.authorization;
+//     console.log(req)
+//     console.log(req.headers.authorization)
+//     return res.status(200).json({ message: 'Successfully logout' });
+// }

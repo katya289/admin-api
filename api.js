@@ -8,6 +8,8 @@ const verifyToken = require('./middleware/authJWT');
 
 router.post('/users/register', userController.registerUser);
 router.post('/users/login', userController.loginUser);
+// router.post('/users/logout', verifyToken, userController.userLogout);
+
 
 router.delete('/account/delete', verifyToken, userController.deleteUserAccount);
 
