@@ -77,3 +77,19 @@ exports.getPodcasts = async (req, res) => {
         return res.status(400).json({ error: 'Error getting podcast' });
     }
 }
+
+
+
+exports.getPodcastsById = async (req, res) => {
+    try {
+        const podcastId = req.params.id;
+        const podcast = await Podcast.findOne({where: {id: podcastId}});
+        console.log(podcast)
+        return res.status(200).json({ message: 'Success', podcast });
+    }
+    catch (error)
+    {
+        console.error('Error getting podcast by id:', error);
+        return res.status(400).json({ error: 'Error getting podcast by id' });
+    }
+}

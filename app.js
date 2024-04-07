@@ -5,7 +5,7 @@ const apiRoutes = require('./api'); // Подключаем файл api.js
 
 const app = express();
 // app.use(express.json());
-
+app.use('/avatars', express.static('avatars'));
 app.use(cors());
 // Используем маршруты из файла api.js
 app.use(express.json());
