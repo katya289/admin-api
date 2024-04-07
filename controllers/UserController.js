@@ -3,47 +3,33 @@ var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
-
-
-// Конфигурация хранилища для Multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'avatars/'); // Указываем папку для сохранения файлов
+        cb(null, 'avatars/');
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname); // Используем оригинальное имя файла
+        cb(null, file.originalname);
     }
 });
 
-// Инициализация Multer с использованием настроенного хранилища
 const upload = multer({ storage: storage });
 
 exports.registerUser = async (req, res) => {
     try {
-        // Используем метод upload.single() для обработки одиночного файла с именем "avatar"
+
         upload.single('avatar')(req, res, async function (err) {
             if (err) {
                 console.error('Error uploading file:', err);
                 return res.status(400).json({ error: 'Error uploading file' });
             }
-
-            // Получаем данные из запроса
             const { name, email, password } = req.body;
-            const avatar = req.file.originalname; // Получаем оригинальное имя файла
-
-            // Проверяем существует ли пользователь с таким email
+            const avatar = req.file.originalname;
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
                 return res.status(400).json({ error: 'User with this email already exists' });
             }
-
-            // Хешируем пароль
             const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Создаем новую запись пользователя с указанием имени файла аватара
             const newUser = await User.create({ name, email, password: hashedPassword, avatar });
-
-            // Отправляем ответ с информацией о зарегистрированном пользователе
             res.status(201).json({ message: 'User registered successfully', user: newUser });
         });
     } catch (error) {
@@ -100,3 +86,18 @@ exports.getAuthorizedUser = async (req, res) => {
 }
 
 
+exports.deleteUserAccount = async (req, res) => {
+    try {
+      
+        const deletedUser = await User.destroy({where: {id: req.user.id}});
+    if (!deletedUser) {
+          
+            return res.status(404).json({ error: 'User not found' });
+        }
+        return res.status(200).send({ message: 'Successfully deleted account' })
+    }
+    catch (error) {
+        console.error(error)
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
