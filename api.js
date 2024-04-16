@@ -17,5 +17,5 @@ router.post('/podcasts/upload', verifyToken, podcastController.uploadPodcast);
 router.get('/users/get', verifyToken, userController.getAuthorizedUser);
 router.get('/podcasts/get', verifyToken, podcastController.getPodcasts);
 router.get('/podcasts/:id/get', verifyToken, podcastController.getPodcastsById);
-
+router.get('/by-category/:category', verifyToken, podcastController.getPodcastsByCategory);
 module.exports = router;

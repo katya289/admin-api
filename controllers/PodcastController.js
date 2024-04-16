@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Podcast = require('../models/Podcast');
 const multer = require('multer');
+const Category = require('../models/category');
 
 let s3;
 const upload = multer({ dest: 'uploads/' });
@@ -21,6 +22,7 @@ exports.uploadPodcast = async (req, res) => {
             const { name, description, format, category } = req.body;
             const userId = req.user.id;
             const file = req.file;
+
             const params = {
                 Bucket: 'aws-bucket.test',
                 Key: file.originalname,
@@ -28,8 +30,27 @@ exports.uploadPodcast = async (req, res) => {
                 StorageClass: 'STANDARD'
             };
             const s3UploadResponse = await s3.upload(params).promise();
-            console.log(s3UploadResponse)
-            const podcast = await Podcast.create({ name, description, format, category, path_file: s3UploadResponse.Location, userId });
+            console.log(s3UploadResponse);
+
+            // Проверяем существует ли категория
+            let existingCategory = await Category.findOne({ where: { name: category } });
+
+            if (!existingCategory) {
+                // Если категория не существует, создаем ее
+                existingCategory = await Category.create({
+                    name: category
+                });
+            }
+
+            // Создаем подкаст, используя идентификатор категории
+            const podcast = await Podcast.create({
+                name,
+                description,
+                format,
+                categoryId: existingCategory.id, // Используем идентификатор созданной категории
+                userId: userId,
+                path_file: s3UploadResponse.Location
+            });
 
             fs.unlinkSync(file.path);
 
@@ -40,6 +61,7 @@ exports.uploadPodcast = async (req, res) => {
         return res.status(400).json({ error: 'Error uploading podcast' });
     }
 };
+
 
 ntpClient.getNetworkTime("pool.ntp.org", 123, function (err, date) {
     if (err) {
@@ -83,13 +105,32 @@ exports.getPodcasts = async (req, res) => {
 exports.getPodcastsById = async (req, res) => {
     try {
         const podcastId = req.params.id;
-        const podcast = await Podcast.findOne({where: {id: podcastId}});
+        const podcast = await Podcast.findOne({ where: { id: podcastId } });
         console.log(podcast)
         return res.status(200).json({ message: 'Success', podcast });
     }
-    catch (error)
-    {
+    catch (error) {
         console.error('Error getting podcast by id:', error);
         return res.status(400).json({ error: 'Error getting podcast by id' });
+    }
+}
+
+
+exports.getPodcastsByCategory = async (req, res) => {
+    try {
+        const categoryName = req.params.category;
+        console.log(categoryName)
+        if (!categoryName) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+
+        const category = await Category.findOne({ where: { name: categoryName } });
+        console.log(category)
+        const podcasts = await Podcast.findAll({ where: { categoryId: category.id } });
+        return res.status(200).json({ message: 'Success', podcasts });
+    }
+    catch (error) {
+        console.error('Error getting podcasts by category:', error);
+        return res.status(400).json({ error: 'Error getting podcasts by category' });
     }
 }

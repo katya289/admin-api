@@ -17,13 +17,15 @@ const Podcast = sequelize.define('Podcast', {
     format: {
         type: DataTypes.STRING
     },
-    category: {
-        type: DataTypes.STRING
-    },
+
     path_file: {
         type: DataTypes.STRING
     },
     userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    categoryId: {
         type: DataTypes.INTEGER,
         allowNull: false
     }
