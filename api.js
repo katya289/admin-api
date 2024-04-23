@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('./controllers/UserController');
 const podcastController = require('./controllers/PodcastController');
+const likeController = require('./controllers/LikeController');
 const verifyToken = require('./middleware/authJWT');
 
 
@@ -9,6 +10,9 @@ const verifyToken = require('./middleware/authJWT');
 router.post('/users/register', userController.registerUser);
 router.post('/users/login', userController.loginUser);
 // router.post('/users/logout', verifyToken, userController.userLogout);
+
+
+router.post('/podcasts/like/:podcastId', verifyToken, likeController.postLike);
 
 
 router.delete('/account/delete', verifyToken, userController.deleteUserAccount);
