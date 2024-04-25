@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Podcast = require('../models/Podcast');
 const multer = require('multer');
 const Category = require('../models/category');
+const Like = require('../models/Like');
 
 let s3;
 const upload = multer({ dest: 'uploads/' });
@@ -132,5 +133,24 @@ exports.getPodcastsByCategory = async (req, res) => {
     catch (error) {
         console.error('Error getting podcasts by category:', error);
         return res.status(400).json({ error: 'Error getting podcasts by category' });
+    }
+}
+
+
+
+exports.getLikedPodcasts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const likes = await Like.findAll({ where: { user_id: userId } });
+        const likedPodcasts = likes.map(like => like.podcast_id);
+        const podcasts = await Podcast.findAll({
+            where: { id: likedPodcasts }
+        });
+        // Отправляем список лайкнутых подкастов клиенту
+        res.status(200).json({ likedPodcasts: podcasts });
+    }
+    catch (error) {
+        console.error('Error fetching user liked podcasts:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 }

@@ -28,6 +28,10 @@ const Podcast = sequelize.define('Podcast', {
     categoryId: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    likes_count: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 },
 {

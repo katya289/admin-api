@@ -13,11 +13,12 @@ router.post('/users/login', userController.loginUser);
 
 
 router.post('/podcasts/like/:podcastId', verifyToken, likeController.postLike);
-
+router.delete('/podcasts/like-delete/:podcastId', verifyToken, likeController.deleteLike);
 
 router.delete('/account/delete', verifyToken, userController.deleteUserAccount);
 
 router.post('/podcasts/upload', verifyToken, podcastController.uploadPodcast);
+router.get('/podcasts/likes', verifyToken, podcastController.getLikedPodcasts);
 router.get('/users/get', verifyToken, userController.getAuthorizedUser);
 router.get('/podcasts/get', verifyToken, podcastController.getPodcasts);
 router.get('/podcasts/:id/get', verifyToken, podcastController.getPodcastsById);
