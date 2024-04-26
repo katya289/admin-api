@@ -13,16 +13,16 @@ exports.postLike = async (req, res) => {
     const existingLike = await Like.findOne({
       where: { podcast_id: podcastId, user_id: userId }
     });
-    if (existingLike) {
-      return res.status(400).json({ message: 'You already liked this podcast' });
-    }
-    else {
+    // if (existingLike) {
+    //   return res.status(400).json({ message: 'You already liked this podcast' });
+    // }
+    // else {
       await Like.create({ podcast_id: podcastId, user_id: userId });
 
       await podcast.increment('likes_count');
 
       return res.status(201).json({ message: 'Podcast liked successfully' });
-    }
+    // }
 
 
   } catch (error) {
