@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Podcast = require('../models/Podcast');
 const multer = require('multer');
-const Category = require('../models/category');
+const Category = require('../models/Category');
 const Like = require('../models/Like');
 
 let s3;
@@ -19,11 +19,9 @@ exports.uploadPodcast = async (req, res) => {
                 console.error('Error uploading file:', err);
                 return res.status(400).json({ error: 'Error uploading file' });
             }
-
             const { name, description, format, category } = req.body;
             const userId = req.user.id;
             const file = req.file;
-
             const params = {
                 Bucket: 'aws-bucket.test',
                 Key: file.originalname,
@@ -32,23 +30,17 @@ exports.uploadPodcast = async (req, res) => {
             };
             const s3UploadResponse = await s3.upload(params).promise();
             console.log(s3UploadResponse);
-
-            // Проверяем существует ли категория
             let existingCategory = await Category.findOne({ where: { name: category } });
-
             if (!existingCategory) {
-                // Если категория не существует, создаем ее
                 existingCategory = await Category.create({
                     name: category
                 });
             }
-
-            // Создаем подкаст, используя идентификатор категории
             const podcast = await Podcast.create({
                 name,
                 description,
                 format,
-                categoryId: existingCategory.id, // Используем идентификатор созданной категории
+                categoryId: existingCategory.id,
                 userId: userId,
                 path_file: s3UploadResponse.Location
             });
@@ -138,19 +130,54 @@ exports.getPodcastsByCategory = async (req, res) => {
 
 
 
+// exports.getLikedPodcasts = async (req, res) => {
+//     try {
+//         const userId = req.user.id;
+//         const likes = await Like.findAll({ where: { user_id: userId } });
+//         const likedPodcasts = likes.map(like => like.podcast_id);
+//         const podcasts = await Podcast.findAll({
+//             where: { id: likedPodcasts }
+//         });
+        
+//         res.status(200).json({ likedPodcasts: podcasts });
+//     }
+//     catch (error) {
+//         console.error('Error fetching user liked podcasts:', error);
+//         res.status(500).json({ message: 'Internal server error' });
+//     }
+// }
+
 exports.getLikedPodcasts = async (req, res) => {
     try {
         const userId = req.user.id;
         const likes = await Like.findAll({ where: { user_id: userId } });
         const likedPodcasts = likes.map(like => like.podcast_id);
         const podcasts = await Podcast.findAll({
-            where: { id: likedPodcasts }
+            where: { id: likedPodcasts },
+            include: [{ model: Category, as: 'Category'}] 
         });
-        // Отправляем список лайкнутых подкастов клиенту
-        res.status(200).json({ likedPodcasts: podcasts });
+
+        
+        if (!podcasts || podcasts.length === 0) {
+            return res.status(404).json({ message: 'No liked podcasts found' });
+        }
+
+       
+        const categorizedPodcasts = podcasts.reduce((acc, podcast) => {
+            const category = podcast.Category.name;
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(podcast);
+            return acc;
+        }, {});
+
+        res.status(200).json({ likedPodcasts: categorizedPodcasts });
     }
     catch (error) {
         console.error('Error fetching user liked podcasts:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+

@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../database.js');
 const User = require('./User');
+const Category = require('./Category.js');
 
 const Podcast = sequelize.define('Podcast', {
     id: {
@@ -40,5 +41,6 @@ const Podcast = sequelize.define('Podcast', {
 
 
 Podcast.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Podcast.belongsTo(Category, {foreignKey: 'categoryId', as: 'Category'});
 
 module.exports = Podcast;
