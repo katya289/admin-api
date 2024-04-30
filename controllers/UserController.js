@@ -88,10 +88,10 @@ exports.getAuthorizedUser = async (req, res) => {
 
 exports.deleteUserAccount = async (req, res) => {
     try {
-      
-        const deletedUser = await User.destroy({where: {id: req.user.id}});
-    if (!deletedUser) {
-          
+
+        const deletedUser = await User.destroy({ where: { id: req.user.id } });
+        if (!deletedUser) {
+
             return res.status(404).json({ error: 'User not found' });
         }
         return res.status(200).send({ message: 'Successfully deleted account' })
@@ -110,3 +110,14 @@ exports.deleteUserAccount = async (req, res) => {
 //     console.log(req.headers.authorization)
 //     return res.status(200).json({ message: 'Successfully logout' });
 // }
+
+
+
+exports.getUserByUserId = async (req, res) => {
+    // console.log(req.params)
+    const userId = req.params.userId;
+    // const podcastId = req.params.id;
+    const user = await User.findAll({ where: { id: userId } });
+    return res.status(200).send({ message: 'Successfully fetched user', user })
+    // const podcast = await Podcast.findOne({ where: { id: podcastId } });
+}

@@ -16,6 +16,7 @@ router.post('/podcasts/like/:podcastId', verifyToken, likeController.postLike);
 router.delete('/podcasts/like-delete/:podcastId', verifyToken, likeController.deleteLike);
 
 router.delete('/account/delete', verifyToken, userController.deleteUserAccount);
+router.get('/users/get/:userId', userController.getUserByUserId);
 
 router.post('/podcasts/upload', verifyToken, podcastController.uploadPodcast);
 router.get('/podcasts/likes', verifyToken, podcastController.getLikedPodcasts);
