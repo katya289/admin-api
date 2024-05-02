@@ -33,6 +33,9 @@ const Podcast = sequelize.define('Podcast', {
     likes_count: {
         type: DataTypes.INTEGER,
         allowNull: true
+    },
+    preview: {
+        type: DataTypes.STRING
     }
 },
 {
