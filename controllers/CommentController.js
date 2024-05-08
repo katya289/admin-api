@@ -1,4 +1,5 @@
 
+const { where } = require('sequelize');
 const { User, Comment } = require('../models/index');
 
 exports.addComment = async (req, res) => {
@@ -21,8 +22,10 @@ exports.addComment = async (req, res) => {
 
 exports.fetchComments = async (req, res) => {
     try {
-      
+        const { podcastId } = req.params;
+        console.log(podcastId);
         const comments = await Comment.findAll({
+            where: {podcastId: podcastId},
             include: [{
                 model: User, 
                 as: 'user',  
@@ -38,6 +41,7 @@ exports.fetchComments = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch comments' });
     }
 }
+
 
 
 
