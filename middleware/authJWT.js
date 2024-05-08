@@ -1,14 +1,14 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models/index');
 
 const verifyToken = (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
 
         const token = req.headers.authorization.split(' ')[1];
-        
+
         jwt.verify(token, process.env.API_SECRET, async (err, decoded) => {
             if (err) {
-               
+
                 return res.status(401).json({ error: 'Invalid token' });
             }
             try {
@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
                 if (!user) {
                     return res.status(401).json({ error: 'User not found' });
                 }
-                req.user = user; 
+                req.user = user;
                 next();
             } catch (error) {
                 console.error('Error finding user:', error);

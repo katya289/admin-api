@@ -13,6 +13,7 @@ router.post('/users/login', userController.loginUser);
 // router.post('/users/logout', verifyToken, userController.userLogout);
 
 router.post('/podcasts/comment/add/:podcastId', verifyToken, commentController.addComment);
+router.get('/podcasts/comments', verifyToken, commentController.fetchComments);
 
 router.post('/podcasts/like/:podcastId', verifyToken, likeController.postLike);
 router.delete('/podcasts/like-delete/:podcastId', verifyToken, likeController.deleteLike);

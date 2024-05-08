@@ -1,7 +1,7 @@
 const multer = require("multer");
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
+const { User } = require('../models/index');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

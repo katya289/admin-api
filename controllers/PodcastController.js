@@ -3,58 +3,13 @@ const fs = require('fs');
 const ntpClient = require('ntp-client');
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
-const Podcast = require('../models/Podcast');
 const multer = require('multer');
-const Category = require('../models/Category');
-const Like = require('../models/Like');
+
+const { Podcast, Category, Like } = require('../models/index');
 
 let s3;
 const upload = multer({ dest: 'uploads/' });
 var uploadMultiple = upload.fields([{ name: 'preview', maxCount: 3 }, { name: 'file', maxCount: 3 }])
-// exports.uploadPodcast = async (req, res) => {
-//     try {
-//         upload.single('file')(req, res, async function (err) {
-//             if (err) {
-//                 console.error('Error uploading file:', err);
-//                 return res.status(400).json({ error: 'Error uploading file' });
-//             }
-//             const { name, description, format, category } = req.body;
-//             const userId = req.user.id;
-//             const file = req.file;
-//             const params = {
-//                 Bucket: 'aws-bucket.test',
-//                 Key: file.originalname,
-//                 Body: fs.createReadStream(file.path),
-//                 StorageClass: 'STANDARD'
-//             };
-//             const s3UploadResponse = await s3.upload(params).promise();
-//             console.log(s3UploadResponse);
-//             let existingCategory = await Category.findOne({ where: { name: category } });
-//             if (!existingCategory) {
-//                 existingCategory = await Category.create({
-//                     name: category
-//                 });
-//             }
-//             const podcast = await Podcast.create({
-//                 name,
-//                 description,
-//                 format,
-//                 categoryId: existingCategory.id,
-//                 userId: userId,
-//                 path_file: s3UploadResponse.Location
-//             });
-
-//             fs.unlinkSync(file.path);
-
-//             res.status(200).json({ message: 'Uploaded podcast successfully', podcast });
-//         });
-//     } catch (error) {
-//         console.error('Error uploading podcast:', error);
-//         return res.status(400).json({ error: 'Error uploading podcast' });
-//     }
-// };
-
 
 exports.uploadPodcast = async (req, res) => {
     try {
@@ -64,7 +19,7 @@ exports.uploadPodcast = async (req, res) => {
                 const userId = req.user.id;
                 const file = req.files.file[0];
                 const preview = req.files.preview[0];
-            
+
                 const params = {
                     Bucket: 'aws-bucket.test',
                     Key: file.originalname,
@@ -72,16 +27,16 @@ exports.uploadPodcast = async (req, res) => {
                     StorageClass: 'STANDARD'
                 };
                 const s3UploadResponse = await s3.upload(params).promise();
-              
+
                 const previewParams = {
                     Bucket: 'aws-bucket.test',
                     Key: preview.originalname,
                     Body: fs.createReadStream(preview.path),
                     StorageClass: 'STANDARD'
                 };
-           
+
                 const s3UploadPreviewResponse = await s3.upload(previewParams).promise();
-               
+
                 let existingCategory = await Category.findOne({ where: { name: category } });
                 if (!existingCategory) {
                     existingCategory = await Category.create({
