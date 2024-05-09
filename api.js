@@ -12,6 +12,7 @@ router.post('/users/register', userController.registerUser);
 router.post('/users/login', userController.loginUser);
 // router.post('/users/logout', verifyToken, userController.userLogout);
 
+router.delete('/podcasts/comment/delete/:commId', verifyToken, commentController.deleteComment);
 router.post('/podcasts/comment/add/:podcastId', verifyToken, commentController.addComment);
 router.get('/podcasts/comments/:podcastId', verifyToken, commentController.fetchComments);
 
