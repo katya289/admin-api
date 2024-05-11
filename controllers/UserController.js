@@ -2,6 +2,20 @@ const multer = require("multer");
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { User } = require('../models/index');
+const generateAuthToken = (userId) => {
+    return jwt.sign({ id: userId }, process.env.API_SECRET, {
+        expiresIn: 86400
+    });
+};
+function generateUniqueSessionId() {
+    // Генерируем случайное число с использованием текущего времени в миллисекундах
+    const randomNum = Math.floor(Math.random() * 1000000);
+    // Получаем текущее время и преобразуем его в строку
+    const currentTime = new Date().getTime().toString();
+    // Конкатенируем случайное число и текущее время
+    const sessionId = randomNum.toString() + currentTime;
+    return sessionId;
+}
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -30,7 +44,8 @@ exports.registerUser = async (req, res) => {
             }
             const hashedPassword = await bcrypt.hash(password, 10);
             const newUser = await User.create({ name, email, password: hashedPassword, avatar });
-            res.status(201).json({ message: 'User registered successfully', user: newUser });
+            const token = generateAuthToken(newUser.id);
+            res.status(201).json({ message: 'User registered successfully', user: newUser, accessToken: token });
         });
     } catch (error) {
         console.error('Error registering user:', error);
@@ -51,6 +66,8 @@ exports.loginUser = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (isPasswordValid) {
+            const sessionId = generateUniqueSessionId(); 
+            console.log(sessionId)
             const token = jwt.sign({ id: user.id }, process.env.API_SECRET, {
                 expiresIn: 86400
             });
@@ -59,6 +76,7 @@ exports.loginUser = async (req, res) => {
                     id: user.id,
                     email: user.email
                 },
+                sessionId, 
                 message: 'Logged in successfully',
                 accessToken: token
             });
@@ -69,7 +87,8 @@ exports.loginUser = async (req, res) => {
         console.error('Error authorizing user:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
+
 
 exports.getAuthorizedUser = async (req, res) => {
     try {
